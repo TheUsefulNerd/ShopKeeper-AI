@@ -5,4 +5,4 @@ select = ["E", "F", "I"]
 line-length = 88
 
 [tool.black]
-line-height = 88
+line-length = 88
