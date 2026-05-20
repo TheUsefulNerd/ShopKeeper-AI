@@ -44,3 +44,33 @@ jobs:
         run: |
           cd frontend
           npx prettier --check .
+  
+  backend-test:
+    runs-on: ubuntu-latest
+    env:
+      GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
+      LANGSMITH_API_KEY: ${{ secrets.LANGSMITH_API_KEY }}
+      JWT_SECRET: ${{ secrets.JWT_SECRET }}
+      SUPABASE_DB_URL: ${{ secrets.SUPABASE_DB_URL }}
+      UPSTASH_REDIS_URL: ${{ secrets.UPSTASH_REDIS_URL }}
+      CORS_ORIGINS: ${{ secrets.CORS_ORIGINS }}
+      ENVIRONMENT: test
+      SUPABASE_TEST_DB_URL: ${{ secrets.SUPABASE_TEST_DB_URL }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: |
+          cd backend
+          pip install -r requirements.txt
+
+      - name: Run pytest
+        run: |
+          cd backend
+          pytest tests/ -v
