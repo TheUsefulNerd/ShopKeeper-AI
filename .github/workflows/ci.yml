@@ -50,6 +50,9 @@ jobs:
     env:
       GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
       LANGSMITH_API_KEY: ${{ secrets.LANGSMITH_API_KEY }}
+      LANGSMITH_PROJECT: ${{ secrets.LANGSMITH_PROJECT }}
+      LANGSMITH_TRACING: ${{ secrets.LANGSMITH_TRACING }}
+      LANGSMITH_ENDPOINT: ${{ secrets.LANGSMITH_ENDPOINT }}
       JWT_SECRET: ${{ secrets.JWT_SECRET }}
       SUPABASE_DB_URL: ${{ secrets.SUPABASE_DB_URL }}
       UPSTASH_REDIS_URL: ${{ secrets.UPSTASH_REDIS_URL }}

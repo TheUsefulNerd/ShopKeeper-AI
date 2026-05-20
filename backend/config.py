@@ -5,6 +5,9 @@ from pydantic_settings import BaseSettings
 class Settings(BaseSettings):
     GROQ_API_KEY: str
     LANGSMITH_API_KEY: str
+    LANGSMITH_PROJECT: str
+    LANGSMITH_TRACING: str
+    LANGSMITH_ENDPOINT: str
     JWT_SECRET: str
     SUPABASE_DB_URL: str
     UPSTASH_REDIS_URL: str
