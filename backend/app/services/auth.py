@@ -24,7 +24,9 @@ _redis_client: redis.Redis | None = None
 def _get_redis() -> redis.Redis:
     global _redis_client
     if _redis_client is None:
-        _redis_client = redis.from_url(settings.UPSTASH_REDIS_URL, decode_responses=True)
+        _redis_client = redis.from_url(
+            settings.UPSTASH_REDIS_URL, decode_responses=True
+        )
     return _redis_client
 
 
@@ -85,7 +87,9 @@ def decode_token(token: str) -> dict:
     Raises HTTP 401 if the token is malformed, expired, or missing required fields.
     """
     try:
-        payload = jwt.decode(token, settings.JWT_SECRET, algorithms=[settings.JWT_ALGORITHM])
+        payload = jwt.decode(
+            token, settings.JWT_SECRET, algorithms=[settings.JWT_ALGORITHM]
+        )
         user_id: str | None = payload.get("sub")
         if user_id is None:
             raise _CREDENTIALS_EXCEPTION
@@ -105,7 +109,9 @@ def blacklist_refresh_token(token: str) -> None:
     Any subsequent /auth/refresh call with this token will be rejected.
     """
     try:
-        payload = jwt.decode(token, settings.JWT_SECRET, algorithms=[settings.JWT_ALGORITHM])
+        payload = jwt.decode(
+            token, settings.JWT_SECRET, algorithms=[settings.JWT_ALGORITHM]
+        )
         exp: int | None = payload.get("exp")
         if exp is not None:
             ttl = int(exp - datetime.now(timezone.utc).timestamp())

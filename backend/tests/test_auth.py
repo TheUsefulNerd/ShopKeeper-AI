@@ -6,11 +6,12 @@ Table creation/teardown is handled by the session-scoped fixture in conftest.py.
 This module only overrides the get_db dependency to use the test session factory.
 """
 
+from unittest.mock import patch
+
 import pytest
 from fastapi.testclient import TestClient
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
-from unittest.mock import patch
 
 from app.dependencies.auth import get_db
 from app.main import app
@@ -56,12 +57,26 @@ def client():
 VALID_USER = {"username": "testuser_auth", "password": "securepass123"}
 
 
-def register(client: TestClient, username: str = VALID_USER["username"], password: str = VALID_USER["password"]):
-    return client.post("/api/v1/auth/register", json={"username": username, "password": password})
+def register(
+    client: TestClient,
+    username: str = VALID_USER["username"],
+    password: str = VALID_USER["password"],
+):
+    return client.post(
+        "/api/v1/auth/register",
+        json={"username": username, "password": password},
+    )
 
 
-def login(client: TestClient, username: str = VALID_USER["username"], password: str = VALID_USER["password"]):
-    return client.post("/api/v1/auth/login", json={"username": username, "password": password})
+def login(
+    client: TestClient,
+    username: str = VALID_USER["username"],
+    password: str = VALID_USER["password"],
+):
+    return client.post(
+        "/api/v1/auth/login",
+        json={"username": username, "password": password},
+    )
 
 
 # ---------------------------------------------------------------------------
@@ -86,7 +101,10 @@ class TestRegister:
 
     def test_register_password_too_short(self, client: TestClient):
         """3 — Register password under 8 chars → 422."""
-        resp = client.post("/api/v1/auth/register", json={"username": "newuser", "password": "short"})
+        resp = client.post(
+            "/api/v1/auth/register",
+            json={"username": "newuser", "password": "short"},
+        )
         assert resp.status_code == 422
 
 
@@ -111,14 +129,18 @@ class TestProtectedRoute:
         """6 — Protected route with valid token → 200."""
         login_resp = login(client)
         token = login_resp.json()["access_token"]
-        resp = client.get("/api/v1/auth/me", headers={"Authorization": f"Bearer {token}"})
+        resp = client.get(
+            "/api/v1/auth/me",
+            headers={"Authorization": f"Bearer {token}"},
+        )
         assert resp.status_code == 200
         assert resp.json()["username"] == VALID_USER["username"]
 
     def test_protected_route_with_no_token(self, client: TestClient):
         """7 — Protected route with no token → 401."""
         resp = client.get("/api/v1/auth/me")
-        assert resp.status_code == 401  # HTTPBearer returns 401 when Authorization header is absent
+        # HTTPBearer returns 401 when Authorization header is absent
+        assert resp.status_code == 401
 
 
 class TestRefresh:
@@ -126,7 +148,10 @@ class TestRefresh:
         """8 — Refresh with valid refresh token → 200 + new access token."""
         login_resp = login(client)
         refresh_token = login_resp.json()["refresh_token"]
-        resp = client.post("/api/v1/auth/refresh", json={"refresh_token": refresh_token})
+        resp = client.post(
+            "/api/v1/auth/refresh",
+            json={"refresh_token": refresh_token},
+        )
         assert resp.status_code == 200
         body = resp.json()
         assert "access_token" in body

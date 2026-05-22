@@ -3,7 +3,9 @@ from pydantic import BaseModel, Field
 
 class RegisterRequest(BaseModel):
     username: str = Field(..., min_length=1, description="Username must not be empty")
-    password: str = Field(..., min_length=8, description="Password must be at least 8 characters")
+    password: str = Field(
+        ..., min_length=8, description="Password must be at least 8 characters"
+    )
 
 
 class RegisterResponse(BaseModel):

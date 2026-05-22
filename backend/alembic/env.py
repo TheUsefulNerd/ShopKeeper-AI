@@ -2,12 +2,12 @@ from logging.config import fileConfig
 
 from sqlalchemy import engine_from_config, pool
 
+# Import all models here so Alembic can detect them for autogenerate
+import app.models.user  # noqa: F401
 from alembic import context
 from app.models.base import Base
 from config import settings
 
-# Import all models here so Alembic can detect them for autogenerate
-import app.models.user  # noqa: F401
 # import app.models.store  (uncomment when store model is added)
 
 config = context.config

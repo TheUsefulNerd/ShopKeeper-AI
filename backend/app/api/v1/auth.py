@@ -35,7 +35,11 @@ router = APIRouter(prefix="/auth", tags=["auth"])
 # ---------------------------------------------------------------------------
 
 
-@router.post("/register", response_model=RegisterResponse, status_code=status.HTTP_201_CREATED)
+@router.post(
+    "/register",
+    response_model=RegisterResponse,
+    status_code=status.HTTP_201_CREATED,
+)
 def register(body: RegisterRequest, db: Session = Depends(get_db)) -> RegisterResponse:
     """
     Register a new user.
@@ -163,4 +167,7 @@ def me(current_user: User = Depends(get_current_user)) -> RegisterResponse:
 
     Used to verify that the JWT dependency works on protected routes.
     """
-    return RegisterResponse(user_id=current_user.user_id, username=current_user.username)
+    return RegisterResponse(
+        user_id=current_user.user_id,
+        username=current_user.username,
+    )

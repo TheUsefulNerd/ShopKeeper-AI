@@ -13,7 +13,8 @@ TestingSessionLocal = sessionmaker(bind=engine)
 @pytest.fixture(scope="session", autouse=True)
 def setup_test_db():
     # The test DB URL sets search_path=test — create the schema if it doesn't exist.
-    # Connect without the search_path option so CREATE SCHEMA can run in the public schema.
+    # Connect without the search_path option so CREATE SCHEMA can run
+    # in the public schema.
     plain_url = settings.SUPABASE_TEST_DB_URL.split("?")[0]
     bootstrap_engine = create_engine(plain_url)
     with bootstrap_engine.connect() as conn:
