@@ -6,10 +6,9 @@ from alembic import context
 from app.models.base import Base
 from config import settings
 
-# Import all models here so Alembic can detect them
-# import app.models.user
-# import app.models.store
-# (uncomment as you add model files)
+# Import all models here so Alembic can detect them for autogenerate
+import app.models.user  # noqa: F401
+# import app.models.store  (uncomment when store model is added)
 
 config = context.config
 config.set_main_option("sqlalchemy.url", settings.SUPABASE_DB_URL)
