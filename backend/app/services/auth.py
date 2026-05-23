@@ -1,13 +1,16 @@
 """
-Auth service — bcrypt password hashing, JWT issuance/decoding, Redis blocklist.
+Auth service — bcrypt password hashing, JWT issuance/decoding, Redis blocklist,
+and Google OAuth 2.0 helpers.
 
-All JWT secrets come from Pydantic Settings. Nothing is hardcoded here.
+All JWT secrets and Google OAuth credentials come from Pydantic Settings.
+Nothing is hardcoded here.
 Redis is used to blocklist refresh tokens on logout.
 """
 
 from datetime import datetime, timedelta, timezone
 
 import bcrypt
+import httpx
 import redis
 from fastapi import HTTPException, status
 from jose import JWTError, jwt
@@ -80,6 +83,20 @@ def create_refresh_token(user_id: str) -> str:
     )
 
 
+def create_google_pending_token(user_id: str) -> str:
+    """
+    Issue a short-lived temporary token for the Google OAuth pending state.
+
+    TTL: 15 minutes. Token type: 'google_pending'.
+    This token is only accepted by POST /auth/google/complete — it is rejected
+    by get_current_user (which only accepts type='access').
+    """
+    return _build_token(
+        {"sub": user_id, "type": "google_pending"},
+        timedelta(minutes=15),
+    )
+
+
 def decode_token(token: str) -> dict:
     """
     Decode and validate a JWT.
@@ -125,3 +142,77 @@ def blacklist_refresh_token(token: str) -> None:
 def is_refresh_token_blacklisted(token: str) -> bool:
     """Return True if the token has been blocklisted via logout."""
     return _get_redis().exists(f"blocklist:{token}") == 1
+
+
+# ---------------------------------------------------------------------------
+# Google OAuth 2.0 helpers
+# ---------------------------------------------------------------------------
+
+_GOOGLE_AUTH_BASE = "https://accounts.google.com/o/oauth2/v2/auth"
+_GOOGLE_TOKEN_URL = "https://oauth2.googleapis.com/token"
+_GOOGLE_USERINFO_URL = "https://www.googleapis.com/oauth2/v3/userinfo"
+
+
+def build_google_auth_url() -> str:
+    """
+    Build the redirect URL to Google's OAuth 2.0 consent screen.
+
+    Scopes: openid, email, profile.
+    Client ID and redirect URI come from Pydantic Settings.
+    """
+    import urllib.parse
+
+    params = {
+        "client_id": settings.GOOGLE_CLIENT_ID,
+        "redirect_uri": settings.GOOGLE_REDIRECT_URI,
+        "response_type": "code",
+        "scope": "openid email profile",
+        "access_type": "offline",
+    }
+    return f"{_GOOGLE_AUTH_BASE}?{urllib.parse.urlencode(params)}"
+
+
+def exchange_google_code(code: str) -> dict:
+    """
+    Exchange an authorization code for Google OAuth tokens.
+
+    Returns the token response dict from Google (contains access_token, id_token, etc.).
+    Raises HTTP 400 if Google rejects the code.
+    """
+    response = httpx.post(
+        _GOOGLE_TOKEN_URL,
+        data={
+            "code": code,
+            "client_id": settings.GOOGLE_CLIENT_ID,
+            "client_secret": settings.GOOGLE_CLIENT_SECRET,
+            "redirect_uri": settings.GOOGLE_REDIRECT_URI,
+            "grant_type": "authorization_code",
+        },
+        timeout=10.0,
+    )
+    if response.status_code != 200:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Failed to exchange Google authorization code",
+        )
+    return response.json()
+
+
+def fetch_google_user_info(access_token: str) -> dict:
+    """
+    Fetch the authenticated user's profile from Google's userinfo endpoint.
+
+    Returns a dict containing at minimum: sub (google_id), email.
+    Raises HTTP 400 if the request fails.
+    """
+    response = httpx.get(
+        _GOOGLE_USERINFO_URL,
+        headers={"Authorization": f"Bearer {access_token}"},
+        timeout=10.0,
+    )
+    if response.status_code != 200:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Failed to fetch Google user info",
+        )
+    return response.json()
