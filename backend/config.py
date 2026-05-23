@@ -17,6 +17,9 @@ class Settings(BaseSettings):
     CORS_ORIGINS: str
     ENVIRONMENT: str = "dev"
     SUPABASE_TEST_DB_URL: str
+    GOOGLE_CLIENT_ID: str = "placeholder"
+    GOOGLE_CLIENT_SECRET: str = "placeholder"
+    GOOGLE_REDIRECT_URI: str = "http://localhost:8000/api/v1/auth/google/callback"
 
     model_config = ConfigDict(env_file=".env")
 

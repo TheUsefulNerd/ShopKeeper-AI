@@ -1,4 +1,6 @@
-from pydantic import BaseModel, Field
+from typing import Annotated, Literal
+
+from pydantic import BaseModel, Field, StringConstraints
 
 
 class RegisterRequest(BaseModel):
@@ -10,11 +12,11 @@ class RegisterRequest(BaseModel):
 
 class RegisterResponse(BaseModel):
     user_id: str
-    username: str
+    username: str | None
 
 
 class LoginRequest(BaseModel):
-    username: str
+    username: str  # accepts username OR email — detection is in the route handler
     password: str
 
 
@@ -31,3 +33,21 @@ class RefreshRequest(BaseModel):
 class AccessTokenResponse(BaseModel):
     access_token: str
     token_type: str = "bearer"
+
+
+class GooglePendingResponse(BaseModel):
+    """
+    Returned by GET /auth/google/callback when the Google email is not in the DB yet.
+
+    The client must POST to /auth/google/complete with the temp_token and a chosen
+    username to finish registration and receive a full JWT.
+    """
+
+    requires_username: Literal[True] = True
+    temp_token: str
+
+
+class CompleteGoogleRegistrationRequest(BaseModel):
+    """Body for POST /auth/google/complete."""
+
+    username: Annotated[str, StringConstraints(min_length=3, strip_whitespace=True)]
