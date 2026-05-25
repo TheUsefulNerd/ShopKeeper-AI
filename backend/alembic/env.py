@@ -2,13 +2,13 @@ from logging.config import fileConfig
 
 from sqlalchemy import engine_from_config, pool
 
-# Import all models here so Alembic can detect them for autogenerate
-import app.models.user  # noqa: F401
+# Import all models via __init__.py so Alembic can detect every table
+# for autogenerate. Adding a new model to __init__.py is sufficient —
+# no changes needed here.
+import app.models  # noqa: F401
 from alembic import context
 from app.models.base import Base
 from config import settings
-
-# import app.models.store  (uncomment when store model is added)
 
 config = context.config
 config.set_main_option("sqlalchemy.url", settings.SUPABASE_DB_URL)
