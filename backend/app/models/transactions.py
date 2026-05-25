@@ -7,11 +7,13 @@ from sqlalchemy import (
     DECIMAL,
     Boolean,
     DateTime,
-    Enum as SAEnum,
     ForeignKey,
     Index,
     Integer,
     String,
+)
+from sqlalchemy import (
+    Enum as SAEnum,
 )
 from sqlalchemy.orm import Mapped, mapped_column
 
@@ -28,9 +30,7 @@ class TransactionStatus(enum.Enum):
 
 class Transaction(Base):
     __tablename__ = "transactions"
-    __table_args__ = (
-        Index("ix_transactions_order_id_status", "order_id", "status"),
-    )
+    __table_args__ = (Index("ix_transactions_order_id_status", "order_id", "status"),)
 
     id: Mapped[str] = mapped_column(
         String(36),

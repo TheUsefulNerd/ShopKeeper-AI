@@ -7,11 +7,13 @@ from sqlalchemy import (
     DECIMAL,
     Boolean,
     DateTime,
-    Enum as SAEnum,
     ForeignKey,
     Index,
     String,
     Text,
+)
+from sqlalchemy import (
+    Enum as SAEnum,
 )
 from sqlalchemy.orm import Mapped, mapped_column
 
@@ -51,7 +53,11 @@ class CustomerEmotionalTone(enum.Enum):
 class Customer(Base):
     __tablename__ = "customers"
     __table_args__ = (
-        Index("ix_customers_session_is_user_controlled", "session_id", "is_user_controlled"),
+        Index(
+            "ix_customers_session_is_user_controlled",
+            "session_id",
+            "is_user_controlled",
+        ),
     )
 
     id: Mapped[str] = mapped_column(

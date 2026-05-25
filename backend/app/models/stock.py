@@ -21,15 +21,9 @@ class Stock(Base):
         unique=True,
         nullable=False,
     )
-    quantity_available: Mapped[int] = mapped_column(
-        Integer, nullable=False, default=0
-    )
-    quantity_reserved: Mapped[int] = mapped_column(
-        Integer, nullable=False, default=0
-    )
-    low_stock_threshold: Mapped[int] = mapped_column(
-        Integer, nullable=False, default=5
-    )
+    quantity_available: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
+    quantity_reserved: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
+    low_stock_threshold: Mapped[int] = mapped_column(Integer, nullable=False, default=5)
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True),
         default=lambda: datetime.now(timezone.utc),
