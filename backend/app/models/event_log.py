@@ -1,8 +1,7 @@
 import uuid
 from datetime import datetime, timezone
 
-from sqlalchemy import DateTime, ForeignKey, Index, String
-from sqlalchemy import JSON
+from sqlalchemy import JSON, DateTime, ForeignKey, Index, String
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.models.base import Base
@@ -10,9 +9,7 @@ from app.models.base import Base
 
 class EventLog(Base):
     __tablename__ = "event_log"
-    __table_args__ = (
-        Index("ix_event_log_session_id", "session_id"),
-    )
+    __table_args__ = (Index("ix_event_log_session_id", "session_id"),)
 
     id: Mapped[str] = mapped_column(
         String(36),

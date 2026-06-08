@@ -2,9 +2,8 @@ import enum
 import uuid
 from datetime import datetime, timezone
 
-from sqlalchemy import DateTime, ForeignKey, Index, Integer, String
+from sqlalchemy import JSON, DateTime, ForeignKey, Index, Integer, String
 from sqlalchemy import Enum as SAEnum
-from sqlalchemy import JSON
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.models.base import Base
@@ -19,9 +18,7 @@ class AgentRunStatus(enum.Enum):
 
 class AgentRun(Base):
     __tablename__ = "agent_runs"
-    __table_args__ = (
-        Index("ix_agent_runs_session_id_status", "session_id", "status"),
-    )
+    __table_args__ = (Index("ix_agent_runs_session_id_status", "session_id", "status"),)
 
     id: Mapped[str] = mapped_column(
         String(36),

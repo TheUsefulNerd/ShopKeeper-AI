@@ -17,9 +17,7 @@ class ConversationRole(enum.Enum):
 
 class AgentConversation(Base):
     __tablename__ = "agent_conversations"
-    __table_args__ = (
-        Index("ix_agent_conversations_customer_id", "customer_id"),
-    )
+    __table_args__ = (Index("ix_agent_conversations_customer_id", "customer_id"),)
 
     id: Mapped[str] = mapped_column(
         String(36),
